@@ -8,7 +8,7 @@
 
   <Identity
     Name="c4d8f4c8-254a-4950-a9f6-a1199c83aaf8"
-    Publisher="CN=samirans"
+    Publisher="CN=Contoso Software, O=Contoso Corporation, C=US"
     Version="1.0.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="c4d8f4c8-254a-4950-a9f6-a1199c83aaf8" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
