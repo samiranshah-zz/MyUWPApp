@@ -1,6 +1,5 @@
-pool:
-  name: Azure Pipelines
-  demands: msbuild
+pool: 
+  vmImage: windows-2019
 
 steps:
 - task: NuGetCommand@2
