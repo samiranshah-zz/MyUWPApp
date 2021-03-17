@@ -1,19 +1,43 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
-trigger:
-- master
-
 pool:
-  vmImage: 'windows-2019'
+  name: Azure Pipelines
+  demands: msbuild
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+- task: NuGetCommand@2
+  displayName: 'NuGet restore'
+  inputs:
+    restoreSolution: MyUWPApp.sln
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+- task: MSIX.msix-ci-automation-task.msix-packaging.MsixPackaging@1
+  displayName: 'MSIX build and package'
+  inputs:
+    outputPath: '$(Build.ArtifactStagingDirectory)\MyApp.msix'
+    solution: MyUWPApp.sln
+    clean: true
+    buildPlatform: x64
+    appPackageDistributionMode: SideloadOnly
+    msbuildArchitecture: x64
+
+- task: MSIX.msix-ci-automation-task.msix-signing.MsixSigning@1
+  displayName: 'Sign MSIX package'
+  inputs:
+    certificate: 'f02106d0-babe-4d09-b487-b6bf3f887f0c'
+    passwordVariable: secret
+
+- task: MSIX.msix-ci-automation-task.app-installer-file.AppInstallerFile@1
+  displayName: 'Create App Installer file'
+  inputs:
+    package: '$(Build.ArtifactStagingDirectory)\MyApp.msix'
+    outputPath: '$(Build.ArtifactStagingDirectory)\MyApp.appinstaller'
+    uri: 'https://myuwpapp-demo.azurewebsites.net/MyApp.appinstaller'
+    mainItemUri: 'https://myuwpapp-demo.azurewebsites.net/MyApp.msix'
+    showPromptWhenUpdating: true
+
+- task: MSIX.msix-ci-automation-task.msix-app-attach.MsixAppAttach@1
+  displayName: 'Create package for MSIX app attach'
+  inputs:
+    package: '$(Build.ArtifactStagingDirectory)\MyApp.msix'
+    vhdxOutputPath: '$(Build.ArtifactStagingDirectory)\MyApp.vhdx'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: drop'
