@@ -6,6 +6,7 @@ on:
 
   workflow_dispatch:
 
+# By default, jobs are run in parallel, to make them run in sequence, add dependencies.
 jobs:
   build:
     runs-on: windows-2019
@@ -20,3 +21,9 @@ jobs:
           echo test, and deploy your project.
       - name: Step 4 - Print env variables
         run: "Get-ChildItem Env: | Sort-Object Name"
+        
+  depends:
+    runs-on: windows-latest
+    needs: [ build ]
+    steps:
+      - run: date
